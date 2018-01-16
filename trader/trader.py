@@ -10,7 +10,7 @@ import strategies
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-fhandler = logging.FileHandler('trader.log')
+fhandler = logging.FileHandler('../logs/trader.log')
 shandler = logging.StreamHandler()
 fhandler.setLevel(logging.INFO)
 shandler.setLevel(logging.INFO)
@@ -24,19 +24,20 @@ logger.addHandler(shandler)
 class KunaTrader(object):
 
     TRADING_UAH_AMOUNT = 6000
+    DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'historical.csv')
 
     def __init__(self):
         self.load_historical_data()
 
     def load_historical_data(self):
-        if os.path.exists('historical.csv'):
-            self.historical_data = pd.read_csv('historical.csv', index_col=0)
+        if os.path.exists(self.DATA_FILE_PATH):
+            self.historical_data = pd.read_csv(self.DATA_FILE_PATH, index_col=0)
         else:
             columns = ['timestamp', 'buy', 'sell', 'low', 'high', 'last', 'vol']
             self.historical_data = pd.DataFrame(columns=columns)
 
     def save_historical_data(self):
-        self.historical_data.to_csv('historical.csv')
+        self.historical_data.to_csv(self.DATA_FILE_PATH)
 
     def update_historical_datas(self):
         data = api.get_tick()
@@ -54,6 +55,7 @@ class KunaTrader(object):
     def main_loop(self):
 
         decision = strategies.RollingMeanStrategy().decide(self.historical_data)
+
         if decision == 'sell':
             api.sell_eth()
         elif decision == 'buy':
@@ -63,13 +65,17 @@ class KunaTrader(object):
 
 
     def start_main_loop(self):
-        while True:
-            try:
-                self.main_loop()
-            except Exception as e:
-                logger.error(e)
+        try:
+            while True:
+                try:
+                    self.main_loop()
+                except Exception as e:
+                    logger.error(e)
 
-            sleep(60*15)
+                sleep(60*15)
+
+        except KeyboardInterrupt:
+            print('Exiting...')
 
 
 if __name__ == "__main__":
