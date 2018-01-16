@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 
 import requests
 
-from .credentials import API_KEY, API_SECRET
+from credentials import API_KEY, API_SECRET
 
 API_DOMAIN = 'https://kuna.io/api/v2'
 TICKERS_URL = '{}/tickers/ethuah'.format(API_DOMAIN)
@@ -72,6 +72,7 @@ def get_tick():
     r = requests.get(TICKERS_URL)
     r.raise_for_status()
     return json.loads(r.content.decode())
+
 
 def get_active_orders(side):
     params = {'market': 'ethuah'}

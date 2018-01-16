@@ -5,6 +5,7 @@ from time import sleep
 import pandas as pd
 
 import kuna_api as api
+import strategies
 
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,15 @@ class KunaTrader(object):
         self.save_historical_data()
 
     def main_loop(self):
-        self.update_historical_datas()
+
+        decision = strategies.RollingMeanStrategy().decide(self.historical_data)
+        if decision == 'sell':
+            api.sell_eth()
+        elif decision == 'buy':
+            api.buy_eth()
+        elif decision == 'wait':
+            pass
+
 
     def start_main_loop(self):
         while True:
