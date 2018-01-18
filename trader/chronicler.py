@@ -1,5 +1,7 @@
 import os
 from time import sleep
+import threading
+
 
 import kuna_api as api
 import pandas as pd
@@ -35,14 +37,14 @@ class KunaChronicler(object):
 
     def log_data(self):
         data = api.get_tick()
-        pd1 = pd.DataFrame({'timestamp': data['at'],
+        df = pd.DataFrame({'timestamp': data['at'],
                             'buy': data['ticker']['buy'],
                             'sell': data['ticker']['sell'],
                             'low': data['ticker']['low'],
                             'high': data['ticker']['high'],
                             'last': data['ticker']['last'],
                             'vol': data['ticker']['vol']}, index=[0])
-        self.historical_data = pd.concat([self.historical_data, pd1])
+        self.historical_data = pd.concat([self.historical_data, df])
         self.historical_data.to_csv(self.DATA_FILE_PATH)
 
     def run_server(self):
@@ -50,20 +52,18 @@ class KunaChronicler(object):
         httpd = HTTPServer(server_address, RequestHandler)
         httpd.serve_forever()
 
-    def start_main_loop(self):
-        try:
-            self.run_server()
-            while True:
-                try:
-                    self.log_data()
-                except Exception as e:
-                    print(e)
+    def start_chronicler(self):
+        while True:
+            try:
+                self.log_data()
+            except Exception:
+                print('exception')
 
-                sleep(60 * 15)
-        except KeyboardInterrupt:
-            print('Exiting...')
+            sleep(60*15)
+
 
 
 if __name__ == "__main__":
     chronicler = KunaChronicler()
-    chronicler.start_main_loop()
+    thread1 = threading.Thread(target=chronicler.run_server).start()
+    thread2 = threading.Thread(target=chronicler.start_chronicler).start()
