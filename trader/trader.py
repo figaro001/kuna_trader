@@ -2,8 +2,8 @@
 import logging
 from time import sleep
 
-from . import kuna_api as api
-from . import strategies
+import kuna_api as api
+import strategies
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
