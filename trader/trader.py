@@ -33,7 +33,7 @@ class KunaTrader(object):
             api.sell_eth(volume, rate)
         elif signal == 1:  # buy
             rate = api.get_eth_buy_rate()
-            volume = self.TRADING_UAH_AMOUNT / self.TRADING_UAH_AMOUNT
+            volume = float(self.TRADING_UAH_AMOUNT) / self.TRADING_UAH_AMOUNT
             logger.info('BUY signal. Buying {} ETH for {} uah'.format(volume, rate))
             api.buy_eth(rate, volume)
 
