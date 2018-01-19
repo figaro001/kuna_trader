@@ -26,7 +26,7 @@ class KunaTrader(object):
     def main_loop(self):
 
         signal = strategies.RollingMeanStrategy(1, 32).check_signal()
-
+        logger.info('signal: {}'.format(signal))
         if signal == -1: #sell
             volume = api.get_eth_amount()
             rate = api.get_eth_sell_rate()
@@ -34,7 +34,7 @@ class KunaTrader(object):
             api.sell_eth(volume, rate)
         elif signal == 1: # buy
             rate = api.get_eth_buy_rate()
-            volume = self.TRADING_UAH_AMOUNT
+            volume = rate / self.TRADING_UAH_AMOUNT
             logger.info('BUY signal. Buying {} ETH for {} uah'.format(volume, rate))
             api.buy_eth(rate, volume)
 
