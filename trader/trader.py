@@ -1,10 +1,9 @@
 
 import logging
-import os
 from time import sleep
 
-import kuna_api as api
-import strategies
+from . import kuna_api as api
+from . import strategies
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -27,14 +26,14 @@ class KunaTrader(object):
 
         signal = strategies.RollingMeanStrategy(1, 32).check_signal()
         logger.info('signal: {}'.format(signal))
-        if signal == -1: #sell
+        if signal == -1:  # sell
             volume = api.get_eth_amount()
             rate = api.get_eth_sell_rate()
             logger.info('SELL received. Selling {} ETH for {} uah'.format(volume, rate))
             api.sell_eth(volume, rate)
-        elif signal == 1: # buy
+        elif signal == 1:  # buy
             rate = api.get_eth_buy_rate()
-            volume = rate / self.TRADING_UAH_AMOUNT
+            volume = self.TRADING_UAH_AMOUNT / self.TRADING_UAH_AMOUNT
             logger.info('BUY signal. Buying {} ETH for {} uah'.format(volume, rate))
             api.buy_eth(rate, volume)
 
