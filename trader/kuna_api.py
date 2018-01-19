@@ -58,7 +58,7 @@ def get_eth_amount():
     if r.status_code != 200:
         print(r)
     r = json.loads(r.content.decode('utf-8'))
-    return float([x for x in r['accounts'] if x['currency']=='eth'][0]['balance'])
+    return [x for x in r['accounts'] if x['currency']=='eth'][0]['balance']
 
 
 def get_eth_sell_rate():
