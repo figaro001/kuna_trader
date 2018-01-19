@@ -1,8 +1,5 @@
-import json
 import random
 from operator import add, sub
-
-import requests
 
 import numpy as np
 import pandas as pd
@@ -10,7 +7,7 @@ import pandas as pd
 
 class DataAccessMixin(object):
 
-    DATA_URL = 'http://0.0.0.0:8081'
+    DATA_URL = 'http://192.168.0.105:8081'
 
     def get_data(self):
         datas = pd.read_json(self.DATA_URL, orient='index')
@@ -23,25 +20,19 @@ class RollingMeanStrategy(DataAccessMixin):
         self.short_window = short_window
         self.long_window = long_window
 
-    def decide(self):
+    def check_signal(self):
         datas = self.get_data()
         datas['position'] = 0.0
         datas['short_mavg'] = datas['sell'].rolling(window=self.short_window, min_periods=1, center=False).mean()
         datas['long_mavg'] = datas['sell'].rolling(window=self.long_window, min_periods=1, center=False).mean()
         datas['position'][self.short_window:] = np.where(datas['short_mavg'][self.short_window:] > datas['long_mavg'][self.short_window:], 1.0, 0.0)
         datas['signals'] = datas['position'].diff()
-        signal = datas.tail(1).signals.item()
+        return datas.tail(1).signals.item()
 
-        if signal == 0:
-            return 'wait'
-        elif signal == 1:
-            return 'buy'
-        elif signal == -1:
-            return 'sell'
+    def backtest(self, datas=None):
 
-    def backtest(self):
-
-        datas = self.get_data()
+        if datas is None:
+            datas = self.get_data()
 
         signals = pd.DataFrame(index=datas.index)
         signals['short_mavg'] = datas['sell'].rolling(window=self.short_window, min_periods=1, center=False).mean()
@@ -52,9 +43,9 @@ class RollingMeanStrategy(DataAccessMixin):
         )
         signals['positions'] = signals['signal'].diff()
 
-
         initial_capital = float(6000)
         positions = pd.DataFrame(index=signals.index).fillna(0.0)
+
         positions['ETH'] = 0.15 * signals['signal']
 
         portfolio = positions.multiply(datas['sell'], axis=0)
@@ -114,10 +105,12 @@ class Optimizer(DataAccessMixin):
         generation_cycles = 100
         nodes = [self.get_random_node() for x in range(population_count)]
 
+        datas = self.get_data()
+
         for generation in range(generation_cycles):
             for node in nodes:
                 strategy = RollingMeanStrategy(short_window=node['short_window'], long_window=node['long_window'])
-                portfolio = strategy.backtest()
+                portfolio = strategy.backtest(datas=datas)
                 node['last_total'] = portfolio.tail(1).total.item()
             nodes = sorted(nodes, key=lambda x: x['last_total'], reverse=True)
 

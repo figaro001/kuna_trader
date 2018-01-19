@@ -25,14 +25,18 @@ class KunaTrader(object):
 
     def main_loop(self):
 
-        decision = strategies.RollingMeanStrategy(8, 10).decide()
+        signal = strategies.RollingMeanStrategy(1, 32).check_signal()
 
-        if decision == 'sell':
-            api.sell_eth()
-        elif decision == 'buy':
-            api.buy_eth()
-        elif decision == 'wait':
-            pass
+        if signal == -1: #sell
+            volume = api.get_eth_amount()
+            rate = api.get_eth_sell_rate()
+            logger.info('SELL received. Selling {} ETH for {} uah'.format(volume, rate))
+            api.sell_eth(volume, rate)
+        elif signal == 1: # buy
+            rate = api.get_eth_buy_rate()
+            volume = self.TRADING_UAH_AMOUNT
+            logger.info('BUY signal. Buying {} ETH for {} uah'.format(volume, rate))
+            api.buy_eth(rate, volume)
 
     def start_main_loop(self):
         try:
