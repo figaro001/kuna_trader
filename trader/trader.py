@@ -1,6 +1,8 @@
 
 import logging
+import traceback
 from time import sleep
+
 
 import kuna_api as api
 import strategies
@@ -30,7 +32,7 @@ class KunaTrader(object):
         if signal == -1:  # sell
             volume = api.get_eth_amount()
             rate = api.get_eth_sell_rate()
-            logger.info('Selling. Amount: {} Rate: {} Cash Expected: {}'.format(volume, rate, volume*rate))
+            logger.info('Selling. Amount: {} Rate: {} Cash Expected: {}'.format(volume, rate, float(volume)*rate))
             api.sell_eth(volume, rate)
 
         elif signal == 1:  # buy
@@ -44,7 +46,9 @@ class KunaTrader(object):
             try:
                 self.main_loop()
             except Exception as e:
-                print(e)
+                tb = traceback.format_exc()
+                print(tb)
+                logger.error(tb)
                 logger.error(e)
 
             sleep(60*15)
