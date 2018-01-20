@@ -35,8 +35,7 @@ def sell_eth(volume, price):
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-    if r.status_code != 200:
-        print(r)
+    r.raise_for_status()
     return r.status_code
 
 
@@ -48,15 +47,13 @@ def buy_eth(volume, price):
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-    if r.status_code != 200:
-        print(r)
+    r.raise_for_status()
     return r.status_code
 
 
 def get_eth_amount():
     r = requests.get(_build_personal_url(ME_URL, 'GET', {}))
-    if r.status_code != 200:
-        print(r)
+    r.raise_for_status()
     r = json.loads(r.content.decode('utf-8'))
     return [x for x in r['accounts'] if x['currency']=='eth'][0]['balance']
 
@@ -73,8 +70,7 @@ def get_eth_buy_rate():
 
 def get_tick():
     r = requests.get(TICKERS_URL)
-    if r.status_code != 200:
-        print(r)
+    r.raise_for_status()
     return json.loads(r.content.decode())
 
 
@@ -82,7 +78,6 @@ def get_active_orders(side):
     params = {'market': 'ethuah'}
     url = _build_personal_url(ORDERS_URL, 'GET', params)
     r = requests.get(url, params)
-    if r.status_code != 200:
-        print(r)
+    r.raise_for_status()
     r = json.loads(r.content.decode('utf-8'))
     return [x for x in r if x['side'] == side]
