@@ -30,14 +30,14 @@ class KunaTrader(object):
         logger.info('signal: {}'.format(signal))
 
         if signal == -1:  # sell
-            volume = api.get_eth_amount()
+            volume = api.get_eth_amount()[:8]
             rate = api.get_eth_sell_rate()
             logger.info('Selling. Amount: {} Rate: {} Cash Expected: {}'.format(volume, rate, float(volume)*rate))
             api.sell_eth(volume, rate)
 
         elif signal == 1:  # buy
             rate = api.get_eth_buy_rate()
-            volume = float(self.TRADING_UAH_AMOUNT) / rate
+            volume = str(float(self.TRADING_UAH_AMOUNT) / rate)[:8]
             logger.info('Buying. Amount: {} Rate: {} Cash Spent: {}'.format(volume, rate, self.TRADING_UAH_AMOUNT))
             api.buy_eth(rate, volume)
 
@@ -47,7 +47,6 @@ class KunaTrader(object):
                 self.main_loop()
             except Exception as e:
                 tb = traceback.format_exc()
-                print(tb)
                 logger.error(tb)
                 logger.error(e)
 
