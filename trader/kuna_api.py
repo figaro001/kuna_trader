@@ -28,7 +28,6 @@ def _build_personal_url(url, method, params):
 
 
 def sell_eth(volume, price):
-    #logger.info('Selling {} ETH for {} UAH to get {} UAH'.format(volume, price, volume * price))
     params = {'side': 'sell',
               'volume': volume,
               'market': 'ethuah',
@@ -47,14 +46,12 @@ def buy_eth(volume, price):
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-    print(r.content)
     r.raise_for_status()
     return r.status_code
 
 
 def get_eth_amount():
     r = requests.get(_build_personal_url(ME_URL, 'GET', {}))
-    print(r.content)
     r.raise_for_status()
     r = json.loads(r.content.decode('utf-8'))
     return [x for x in r['accounts'] if x['currency']=='eth'][0]['balance']

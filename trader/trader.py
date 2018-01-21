@@ -24,9 +24,12 @@ class KunaTrader(object):
 
     TRADING_UAH_AMOUNT = 6000
 
-    def main_loop(self):
+    def process_latest_signal(self):
 
-        signal = strategies.RollingMeanStrategy(1, 32).check_signal()
+        strategy = strategies.RollingMeanStrategy(1, 32)
+        signals = strategy.fill_signals()
+        signal = signals.tail(1).signals.item()
+
         logger.info('signal: {}'.format(signal))
 
         if signal == -1:  # sell
@@ -44,7 +47,7 @@ class KunaTrader(object):
     def start_main_loop(self):
         while True:
             try:
-                self.main_loop()
+                self.process_latest_signal()
             except Exception as e:
                 tb = traceback.format_exc()
                 logger.error(tb)

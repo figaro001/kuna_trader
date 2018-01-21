@@ -20,14 +20,14 @@ class RollingMeanStrategy(DataAccessMixin):
         self.short_window = short_window
         self.long_window = long_window
 
-    def check_signal(self):
+    def fill_signals(self):
         datas = self.get_data()
         datas['position'] = 0.0
         datas['short_mavg'] = datas['sell'].rolling(window=self.short_window, min_periods=1, center=False).mean()
         datas['long_mavg'] = datas['sell'].rolling(window=self.long_window, min_periods=1, center=False).mean()
         datas['position'][self.short_window:] = np.where(datas['short_mavg'][self.short_window:] > datas['long_mavg'][self.short_window:], 1.0, 0.0)
         datas['signals'] = datas['position'].diff()
-        return datas.tail(1).signals.item()
+        return datas
 
     def backtest(self, datas=None):
 
