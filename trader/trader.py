@@ -42,7 +42,7 @@ class KunaTrader(object):
             rate = api.get_eth_buy_rate()
             volume = str(float(self.TRADING_UAH_AMOUNT) / rate)[:8]
             logger.info('Buying. Amount: {} Rate: {} Cash Spent: {}'.format(volume, rate, self.TRADING_UAH_AMOUNT))
-            api.buy_eth(rate, volume)
+            api.buy_eth(volume, rate)
 
     def start_main_loop(self):
         while True:
