@@ -1,23 +1,10 @@
 
-import logging
-import traceback
 from time import sleep
-
 
 import kuna_api as api
 import strategies
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-fhandler = logging.FileHandler('../logs/trader.log')
-shandler = logging.StreamHandler()
-fhandler.setLevel(logging.INFO)
-shandler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s  %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-fhandler.setFormatter(formatter)
-shandler.setFormatter(formatter)
-logger.addHandler(fhandler)
-logger.addHandler(shandler)
+from log import logger
 
 
 class KunaTrader(object):
@@ -35,7 +22,6 @@ class KunaTrader(object):
         if signal == -1:  # sell
             volume = api.get_eth_amount()[:8]
             rate = api.get_eth_sell_rate()
-            logger.info('Selling. Amount: {} Rate: {} Cash Expected: {}'.format(volume, rate, float(volume)*rate))
             api.sell_eth(volume, rate)
 
         elif signal == 1:  # buy
@@ -49,8 +35,6 @@ class KunaTrader(object):
             try:
                 self.process_latest_signal()
             except Exception as e:
-                tb = traceback.format_exc()
-                logger.error(tb)
                 logger.error(e)
 
             sleep(60*15)

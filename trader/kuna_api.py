@@ -9,6 +9,8 @@ from urllib.parse import urlencode
 import requests
 
 from credentials import API_KEY, API_SECRET
+from log import logger
+
 
 API_DOMAIN = 'https://kuna.io/api/v2'
 TICKERS_URL = '{}/tickers/ethuah'.format(API_DOMAIN)
@@ -28,26 +30,35 @@ def _build_personal_url(url, method, params):
 
 
 def sell_eth(volume, price):
+    logger.info('Selling {} ETH for {} price'.format(volume, price))
     params = {'side': 'sell',
               'volume': volume,
               'market': 'ethuah',
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-    r.raise_for_status()
-    return r.status_code
+
+    if r.status_code == 200:
+        logger.info('Order sent')
+    else:
+        logger.error('Failed. Status Code: {}'.format(r.status_code))
+        logger.error('{}'.format(r.content))
 
 
 def buy_eth(volume, price):
-
+    logger.info('Buying {} ETH for {} price'.format(volume, price))
     params = {'side': 'buy',
               'volume': volume,
               'market': 'ethuah',
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-    r.raise_for_status()
-    return r.status_code
+
+    if r.status_code == 200:
+        logger.info('Order sent')
+    else:
+        logger.error('Failed. Status Code: {}'.format(r.status_code))
+        logger.error('{}'.format(r.content))
 
 
 def get_eth_amount():
