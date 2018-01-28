@@ -30,42 +30,30 @@ def _build_personal_url(url, method, params):
 
 
 def sell_eth(volume, price):
-    logger.info('Selling {} ETH for {} price'.format(volume, price))
     params = {'side': 'sell',
               'volume': volume,
               'market': 'ethuah',
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-
-    if r.status_code == 200:
-        logger.info('Order sent')
-    else:
-        logger.error('Failed. Status Code: {}'.format(r.status_code))
-        logger.error('{}'.format(r.content))
+    return r
 
 
 def buy_eth(volume, price):
-    logger.info('Buying {} ETH for {} price'.format(volume, price))
     params = {'side': 'buy',
               'volume': volume,
               'market': 'ethuah',
               'price': price}
     url = _build_personal_url(ORDERS_URL, 'POST', params)
     r = requests.post(url, params)
-
-    if r.status_code == 200:
-        logger.info('Order sent')
-    else:
-        logger.error('Failed. Status Code: {}'.format(r.status_code))
-        logger.error('{}'.format(r.content))
+    return r
 
 
-def get_eth_amount():
+def get_currency_balance(currency_name):
     r = requests.get(_build_personal_url(ME_URL, 'GET', {}))
     r.raise_for_status()
     r = json.loads(r.content.decode('utf-8'))
-    return [x for x in r['accounts'] if x['currency']=='eth'][0]['balance']
+    return [x for x in r['accounts'] if x['currency']==currency_name][0]['balance']
 
 
 def get_eth_sell_rate():
@@ -84,10 +72,12 @@ def get_tick():
     return json.loads(r.content.decode())
 
 
-def get_active_orders(side):
+def get_active_orders(side=None):
     params = {'market': 'ethuah'}
     url = _build_personal_url(ORDERS_URL, 'GET', params)
     r = requests.get(url, params)
     r.raise_for_status()
     r = json.loads(r.content.decode('utf-8'))
-    return [x for x in r if x['side'] == side]
+    if side:
+        r = [x for x in r if x['side'] == side]
+    return r
