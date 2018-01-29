@@ -61,7 +61,7 @@ class KunaTrader(object):
 
     def process_latest_signal(self):
 
-        strategy = strategies.RollingMeanStrategy(1, 32)
+        strategy = strategies.RollingMeanStrategy(93, 104)
         signals = strategy.fill_signals()
         signal = signals.tail(1).signals.item()
 
