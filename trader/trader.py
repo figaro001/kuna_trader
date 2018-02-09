@@ -10,6 +10,7 @@ from log import logger
 class KunaTrader(object):
 
     TRADING_UAH_AMOUNT = 6000
+    STOP_LOSS = 300
 
     def sell(self):
         orders = api.get_active_orders()
@@ -59,6 +60,14 @@ class KunaTrader(object):
             logger.error('Failed. Status Code: {}'.format(result.status_code))
             logger.error('{}'.format(result.content))
 
+    def stop_loss(self):
+        rate = api.get_eth_sell_rate()
+        potential_income = api.get_currency_balance('eth') * rate
+        latest_spending = api.get_trades_history()[0]['funds'] #get latest buy deal
+        if (latest_spending - potential_income) < self.STOP_LOSS:
+            logger.info('STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'.format(rate, self.LATEST_SPENDING, potential_income))
+            self.sell()
+
     def process_latest_signal(self):
 
         strategy = strategies.RollingMeanStrategy(93, 104)
@@ -66,6 +75,8 @@ class KunaTrader(object):
         signal = signals.tail(1).signals.item()
 
         logger.info('signal: {}'.format(signal))
+
+        self.stop_loss()
 
         if signal == -1:  # sell
             self.sell()

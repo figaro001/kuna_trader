@@ -9,12 +9,12 @@ from urllib.parse import urlencode
 import requests
 
 from credentials import API_KEY, API_SECRET
-from log import logger
 
 
 API_DOMAIN = 'https://kuna.io/api/v2'
 TICKERS_URL = '{}/tickers/ethuah'.format(API_DOMAIN)
 ORDERS_URL =  '{}/orders'.format(API_DOMAIN)
+TRADES_URL = '{}/trades/my'.format(API_DOMAIN)
 ME_URL = '{}/members/me'.format(API_DOMAIN)
 
 
@@ -80,4 +80,13 @@ def get_active_orders(side=None):
     r = json.loads(r.content.decode('utf-8'))
     if side:
         r = [x for x in r if x['side'] == side]
+    return r
+
+
+def get_trades_history():
+    params = {'market': 'ethuah'}
+    url = _build_personal_url(TRADES_URL, 'GET', params)
+    r = requests.get(url, params)
+    r.raise_for_status()
+    r = json.loads(r.content.decode('utf-8'))
     return r
