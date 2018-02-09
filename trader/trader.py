@@ -65,12 +65,21 @@ class KunaTrader(object):
             logger.error('{}'.format(result.content))
 
     def stop_loss(self):
-        rate = self.api_client.get_eth_sell_rate()
-        potential_income = float(self.api_client.get_currency_balance('eth')) * rate
-        latest_spending = float(self.api_client.get_trades_history()[0]['funds']) #get latest buy deal
-        if (latest_spending - potential_income) < self.STOP_LOSS:
-            logger.info('STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'.format(rate, self.LATEST_SPENDING, potential_income))
-            self.sell()
+        available_volume = float(self.api_client.get_currency_balance('eth'))
+
+        if available_volume > 0.001:
+            rate = self.api_client.get_eth_sell_rate()
+            potential_income = float(self.api_client.get_currency_balance('eth')) * rate
+
+            deals = self.api_client.get_trades_history()
+            buy_deals = list(filter(lambda x: x['side']=='bid', deals))
+            latest_spending = buy_deals[0]['fund']
+
+            if (latest_spending - potential_income) < self.STOP_LOSS:
+                msg = 'STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'
+                msg = msg.format(rate, latest_spending, potential_income)
+                logger.info(msg)
+                self.sell()
 
     def process_latest_signal(self):
 
