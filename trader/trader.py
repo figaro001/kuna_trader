@@ -1,8 +1,9 @@
 
 from time import sleep
 
-import kuna_api as api
 import strategies
+from kuna_api import KunaApiClient
+from credentials import API_KEY, API_SECRET
 
 from log import logger
 
@@ -12,10 +13,13 @@ class KunaTrader(object):
     TRADING_UAH_AMOUNT = 6000
     STOP_LOSS = 300
 
+    def __init__(self):
+        self.api_client = KunaApiClient(API_KEY, API_SECRET)
+
     def sell(self):
-        orders = api.get_active_orders()
-        available_volume = api.get_currency_balance('eth')[:8]
-        rate = api.get_eth_sell_rate()
+        orders = self.api_client.get_active_orders()
+        available_volume = self.api_client.get_currency_balance('eth')[:8]
+        rate = self.api_client.get_eth_sell_rate()
         err = None
 
         logger.info('Sell initiated. Volume:{} Price:{}'.format(available_volume, rate))
@@ -28,7 +32,7 @@ class KunaTrader(object):
             logger.info('Sell canceled. Error: {}'.format(err))
             return
 
-        result = api.sell_eth(available_volume, rate)
+        result = self.api_client.sell_eth(available_volume, rate)
 
         if result.status_code == 201:
             logger.info('Sell order placed succesfully')
@@ -37,9 +41,9 @@ class KunaTrader(object):
             logger.error('{}'.format(result.content))
 
     def buy(self):
-        available_cash = api.get_currency_balance('uah')[:8]
-        orders = api.get_active_orders()
-        rate = api.get_eth_buy_rate()
+        available_cash = self.api_client.get_currency_balance('uah')[:8]
+        orders = self.api_client.get_active_orders()
+        rate = self.api_client.get_eth_buy_rate()
         volume = str(float(self.TRADING_UAH_AMOUNT) / rate)[:8]
 
         logger.info('Buy initiated. Amount: {} Rate: {} Cash Spent: {}'.format(volume, rate, float(volume)*rate))
@@ -52,7 +56,7 @@ class KunaTrader(object):
             logger.info('Buy canceled. Error: {}'.format(err))
             return
 
-        result = api.buy_eth(volume, rate)
+        result = self.api_client.buy_eth(volume, rate)
 
         if result.status_code == 201:
             logger.info('Buy order placed succesfully')
@@ -61,9 +65,9 @@ class KunaTrader(object):
             logger.error('{}'.format(result.content))
 
     def stop_loss(self):
-        rate = api.get_eth_sell_rate()
-        potential_income = api.get_currency_balance('eth') * rate
-        latest_spending = api.get_trades_history()[0]['funds'] #get latest buy deal
+        rate = self.api_client.get_eth_sell_rate()
+        potential_income = float(self.api_client.get_currency_balance('eth')) * rate
+        latest_spending = float(self.api_client.get_trades_history()[0]['funds']) #get latest buy deal
         if (latest_spending - potential_income) < self.STOP_LOSS:
             logger.info('STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'.format(rate, self.LATEST_SPENDING, potential_income))
             self.sell()
