@@ -20,7 +20,6 @@ class KunaApiClient(object):
         self.api_key = api_key
         self.api_secret = api_secret
 
-
     def _build_personal_url(self, url, method, params):
         tonce = int(round(time.time() * 1000))
         params['tonce'] = tonce
@@ -31,7 +30,6 @@ class KunaApiClient(object):
         signature = signature.hexdigest()
         return '{0}?access_key={1}&tonce={2}&signature={3}'.format(url, self.api_key, tonce, signature)
 
-
     def sell_eth(self, volume, price):
         params = {'side': 'sell',
                   'volume': volume,
@@ -40,7 +38,6 @@ class KunaApiClient(object):
         url = self._build_personal_url(self.ORDERS_URL, 'POST', params)
         r = requests.post(url, params)
         return r
-
 
     def buy_eth(self, volume, price):
         params = {'side': 'buy',
@@ -51,29 +48,30 @@ class KunaApiClient(object):
         r = requests.post(url, params)
         return r
 
-
     def get_currency_balance(self, currency_name):
         r = requests.get(self._build_personal_url(self.ME_URL, 'GET', {}))
         r.raise_for_status()
         r = json.loads(r.content.decode('utf-8'))
         return [x for x in r['accounts'] if x['currency']==currency_name][0]['balance']
 
+    def get_balance(self):
+        r = requests.get(self._build_personal_url(self.ME_URL, 'GET', {}))
+        r.raise_for_status()
+        r = json.loads(r.content.decode('utf-8'))
+        return r['accounts']
 
     def get_eth_sell_rate(self):
         r = requests.get(self.TICKERS_URL)
         return float(json.loads(r.content.decode())['ticker']['sell'])
 
-
     def get_eth_buy_rate(self):
         r = requests.get(self.TICKERS_URL)
         return float(json.loads(r.content.decode())['ticker']['buy'])
-
 
     def get_tick(self):
         r = requests.get(self.TICKERS_URL)
         r.raise_for_status()
         return json.loads(r.content.decode())
-
 
     def get_active_orders(self, side=None):
         params = {'market': 'ethuah'}
@@ -84,7 +82,6 @@ class KunaApiClient(object):
         if side:
             r = [x for x in r if x['side'] == side]
         return r
-
 
     def get_trades_history(self):
         params = {'market': 'ethuah'}
