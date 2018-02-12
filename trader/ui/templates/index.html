@@ -8,53 +8,102 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <title>Kuna Client</title>
+    <link rel="shortcut icon" href="https://037c96109eafecbaffbb36cdbe21d279.s3-eu-west-1.amazonaws.com/images/cryptocoin-ripple-base.png" type="image/x-icon">
+
+    <title>KClient</title>
   </head>
 
   <body>
 
   <div class="container">
-    <div class="row">
-      <div class="alert alert-danger col-md-12" role="alert">
-        Dis is the header
-      </div>
-    </div>
+    <nav class="navbar navbar-expand-lg rounded navbar-dark bg-dark">
+        <div class="collapse navbar-collapse justify-content-md-center" id="navbarsExample10">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Kuna Client<span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+        </div>
+    </nav>
+
 
     <div class="row">
       <div class="col-sm">
-        <h3>ETH Tick</h3>
-        <ul class="list-group">
-          <li class="list-group-item">at: {{ at }}</li>
-          <li class="list-group-item">
-            <span class="badge badge-info">BUY </span> {{ eth_tick.ticker.buy }}
-          </li>
-          <li class="list-group-item">
-            <span class="badge badge-info">SELL</span> {{ eth_tick.ticker.sell }}
-          </li>
-        </ul>
+        <h4>ETH Tick</h4>
+        <table class="table table-striped table-bordered table-sm">
+          <tbody>
+          <tr>
+            <td>at</td>
+            <td>{{ at }}</td>
+          </tr>
+
+          <tr>
+            <td>Buy</td>
+            <td>
+              {{ eth_tick.ticker.buy|currency }}
+            </td>
+          </tr>
+
+          <tr>
+            <td>Sell</td>
+            <td>{{ eth_tick.ticker.sell|currency  }}</td>
+          </tr>
+
+           <tr>
+            <td>Last</td>
+            <td>{{ eth_tick.ticker.last|currency  }}</td>
+          </tr>
+
+          <tr>
+            <td>Low</td>
+            <td>{{ eth_tick.ticker.low|currency  }}</td>
+          </tr>
+
+          <tr>
+            <td>High</td>
+            <td>{{ eth_tick.ticker.high|currency  }}</td>
+          </tr>
+
+          <tr>
+            <td>Vol</td>
+            <td>{{ eth_tick.ticker.vol }}</td>
+          </tr>
+
+          </tbody>
+        </table>
+
       </div>
       <div class="col-sm">
-        <h3>Активы</h3>
-        <ul class="list-group">
+        <h4>Активы</h4>
+        <table class="table table-striped table-bordered table-sm">
+          <tbody>
           {% for account in actives %}
               {% if account.balance != '0.0' %}
-                  <li class="list-group-item">
-                    {{ account.currency|upper }}: {{ account.balance }}
-                  </li>
+                  <tr>
+                    <td>{{ account.currency|upper }}</td>
+                    <td>{{ account.balance }}</td>
+                  </tr>
               {% endif %}
           {% endfor %}
-        </ul>
+        </tbody>
+        </table>
       </div>
 
       <div class="col-sm">
-         <h3>Активные Ордеры</h3>
-        <ul>
+        <h4>Активные Ордеры</h4>
+        <table class="table table-striped table-bordered table-sm">
+        <tbody>
           {% for order in orders %}
-              <li>{{ order }}</li>
+              <tr>
+                <td>
+                  {{ order }}
+                </td>
+              </tr>
           {% else %}
-              <li>Пусто...</li>
+              Пусто...
           {% endfor %}
-        </ul>
+          </tbody>
+        </table>
       </div>
     </div>
 
