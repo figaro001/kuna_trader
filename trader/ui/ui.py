@@ -4,6 +4,8 @@ from flask import Flask
 from flask import render_template
 from ..kuna_api import KunaApiClient
 from ..credentials import API_KEY, API_SECRET
+from ..strategies import DataAccessMixin
+import json
 
 app = Flask(__name__)
 
@@ -16,7 +18,7 @@ def format_currency(value):
 def shortdate(value):
     try:
         value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
-        value = value.strftime('%y-%m-%d %H:%M')
+        value = value.strftime('%d-%m-%y %H:%M')
     except:
         pass
     return value
@@ -36,6 +38,9 @@ def hello_world():
         logs = f.read()
 
     logs = logs.splitlines()[-10:]
+    data = DataAccessMixin().get_data().to_json()
+    data = json.loads(data)
+    data = [ [int(x[0]), x[1] ] for x in data['sell'].items() ]
 
     return render_template('index.html',
                            at=at,
@@ -44,4 +49,5 @@ def hello_world():
                            orders=orders,
                            logs=logs,
                            deals=deals,
+                           data=data,
                            )
