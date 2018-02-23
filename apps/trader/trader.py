@@ -1,20 +1,27 @@
-
+import logging
 from time import sleep
 
-import strategies
-from kuna_api import KunaApiClient
-from credentials import API_KEY, API_SECRET
+from . import strategies
+from ..service.mixins import ApiAccessMixin
 
-from log import logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+fhandler = logging.FileHandler('trader.log')
+shandler = logging.StreamHandler()
+fhandler.setLevel(logging.INFO)
+shandler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s  %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+fhandler.setFormatter(formatter)
+shandler.setFormatter(formatter)
+logger.addHandler(fhandler)
+logger.addHandler(shandler)
 
 
-class KunaTrader(object):
+
+class KunaTrader(ApiAccessMixin):
 
     TRADING_UAH_AMOUNT = 6000
     STOP_LOSS = 300
-
-    def __init__(self):
-        self.api_client = KunaApiClient(API_KEY, API_SECRET)
 
     def sell(self):
         orders = self.api_client.get_active_orders()
@@ -97,7 +104,6 @@ class KunaTrader(object):
         elif signal == 1:  # buy
             self.buy()
 
-
     def start_main_loop(self):
         while True:
             try:
@@ -106,7 +112,6 @@ class KunaTrader(object):
                 logger.error(e)
 
             sleep(60*15)
-
 
 
 if __name__ == "__main__":

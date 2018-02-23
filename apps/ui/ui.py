@@ -1,11 +1,12 @@
-from datetime import datetime
-
-from flask import Flask
-from flask import render_template
-from ..kuna_api import KunaApiClient
-from ..credentials import API_KEY, API_SECRET
-from ..strategies import DataAccessMixin
 import json
+from datetime import datetime
+import sys
+sys.path.append('..')
+from flask import Flask, render_template
+import service
+from service.credentials import API_KEY, API_SECRET
+from service.kuna_api import KunaApiClient
+from trader.strategies import RemoteDataAccessMixin
 
 app = Flask(__name__)
 
@@ -34,11 +35,11 @@ def hello_world():
     deals = client.get_trades_history()
     deals = [x for x in deals if x['market']=='ethuah'][:10]
 
-    with open('../../logs/trader.log', 'r') as f:
+    with open('../trader/trader.log', 'r') as f:
         logs = f.read()
 
     logs = logs.splitlines()[-10:]
-    data = DataAccessMixin().get_data().to_json()
+    data = RemoteDataAccessMixin().get_data().to_json()
     data = json.loads(data)
     data = [ [int(x[0]), x[1] ] for x in data['sell'].items() ]
 

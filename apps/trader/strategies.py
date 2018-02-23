@@ -3,18 +3,12 @@ from operator import add, sub
 
 import numpy as np
 import pandas as pd
+import sys
+sys.path.append('..')
+from service.mixins import RemoteDataAccessMixin
 
 
-class DataAccessMixin(object):
-
-    DATA_URL = 'http://192.168.0.105:8081'
-
-    def get_data(self):
-        datas = pd.read_json(self.DATA_URL, orient='index')
-        return datas
-
-
-class RollingMeanStrategy(DataAccessMixin):
+class RollingMeanStrategy(RemoteDataAccessMixin):
 
     def __init__(self, short_window=8, long_window=10):
         self.short_window = short_window
@@ -58,7 +52,7 @@ class RollingMeanStrategy(DataAccessMixin):
         return portfolio
 
 
-class Optimizer(DataAccessMixin):
+class Optimizer(RemoteDataAccessMixin):
 
     def __init__(self):
         data = self.get_data()

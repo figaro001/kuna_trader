@@ -8,6 +8,9 @@ from urllib.parse import urlencode
 
 import requests
 
+from . import credentials
+
+
 class KunaApiClient(object):
 
     API_DOMAIN = 'https://kuna.io/api/v2'
@@ -16,7 +19,7 @@ class KunaApiClient(object):
     TRADES_URL = '{}/trades/my'.format(API_DOMAIN)
     ME_URL = '{}/members/me'.format(API_DOMAIN)
 
-    def __init__(self, api_key, api_secret):
+    def __init__(self, api_key=credentials.API_KEY, api_secret=credentials.API_SECRET):
         self.api_key = api_key
         self.api_secret = api_secret
 

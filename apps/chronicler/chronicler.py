@@ -1,16 +1,14 @@
-import os
-from time import sleep
 import threading
-
-
-import kuna_api as api
+from time import sleep
 import pandas as pd
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import sys
+sys.path.append('..')
+from service import mixins
 
-class RequestHandler(BaseHTTPRequestHandler):
 
-    DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'historical.csv')
+class RequestHandler(BaseHTTPRequestHandler, mixins.LocalDataAccessMixin):
 
     def do_GET(self):
         self.send_response(200)
@@ -23,27 +21,17 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 
-class KunaChronicler(object):
-
-    DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'historical.csv')
-
-    def __init__(self):
-
-        if os.path.exists(self.DATA_FILE_PATH):
-            self.historical_data = pd.read_csv(self.DATA_FILE_PATH, index_col=0)
-        else:
-            columns = ['timestamp', 'buy', 'sell', 'low', 'high', 'last', 'vol']
-            self.historical_data = pd.DataFrame(columns=columns)
+class KunaChronicler(mixins.LocalDataAccessMixin, mixins.ApiAccessMixin):
 
     def log_data(self):
-        data = api.get_tick()
+        data = self.api_client.get_tick()
         df = pd.DataFrame({'timestamp': data['at'],
-                            'buy': data['ticker']['buy'],
-                            'sell': data['ticker']['sell'],
-                            'low': data['ticker']['low'],
-                            'high': data['ticker']['high'],
-                            'last': data['ticker']['last'],
-                            'vol': data['ticker']['vol']}, index=[0])
+                           'buy': data['ticker']['buy'],
+                           'sell': data['ticker']['sell'],
+                           'low': data['ticker']['low'],
+                           'high': data['ticker']['high'],
+                           'last': data['ticker']['last'],
+                           'vol': data['ticker']['vol']}, index=[0])
         self.historical_data = pd.concat([self.historical_data, df])
         self.historical_data.to_csv(self.DATA_FILE_PATH)
 
@@ -60,7 +48,6 @@ class KunaChronicler(object):
                 print('exception')
 
             sleep(60*15)
-
 
 
 if __name__ == "__main__":
