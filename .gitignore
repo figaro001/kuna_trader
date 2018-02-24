@@ -5,4 +5,4 @@ __pycache__
 .idea/
 credentials.py
 venv/
-fabfile.py
+celerybeat-schedule

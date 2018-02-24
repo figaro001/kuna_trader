@@ -1,8 +1,7 @@
 import logging
-from time import sleep
 
 from . import strategies
-from ..service.mixins import ApiAccessMixin
+from kuna_api import KunaApiClient
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -18,10 +17,14 @@ logger.addHandler(shandler)
 
 
 
-class KunaTrader(ApiAccessMixin):
+class KunaTrader(object):
 
     TRADING_UAH_AMOUNT = 6000
     STOP_LOSS = 300
+
+    def __init__(self, data_url):
+        self.api_client = KunaApiClient()
+        self.data_url = data_url
 
     def sell(self):
         orders = self.api_client.get_active_orders()
@@ -90,7 +93,7 @@ class KunaTrader(ApiAccessMixin):
 
     def process_latest_signal(self):
 
-        strategy = strategies.RollingMeanStrategy(93, 104)
+        strategy = strategies.RollingMeanStrategy(self.data_url, 93, 104)
         signals = strategy.fill_signals()
         signal = signals.tail(1).signals.item()
 
@@ -103,17 +106,3 @@ class KunaTrader(ApiAccessMixin):
 
         elif signal == 1:  # buy
             self.buy()
-
-    def start_main_loop(self):
-        while True:
-            try:
-                self.process_latest_signal()
-            except Exception as e:
-                logger.error(e)
-
-            sleep(60*15)
-
-
-if __name__ == "__main__":
-    trader = KunaTrader()
-    trader.start_main_loop()

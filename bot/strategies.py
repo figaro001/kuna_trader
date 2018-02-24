@@ -3,16 +3,18 @@ from operator import add, sub
 
 import numpy as np
 import pandas as pd
-import sys
-sys.path.append('..')
-from service.mixins import RemoteDataAccessMixin
 
 
-class RollingMeanStrategy(RemoteDataAccessMixin):
+class RollingMeanStrategy(object):
 
-    def __init__(self, short_window=8, long_window=10):
+    def __init__(self, data_url, short_window=8, long_window=10):
         self.short_window = short_window
         self.long_window = long_window
+        self.data_url = data_url
+
+    def get_data(self):
+        datas = pd.read_json(self.data_url, orient='index')
+        return datas
 
     def fill_signals(self):
         datas = self.get_data()
@@ -52,7 +54,7 @@ class RollingMeanStrategy(RemoteDataAccessMixin):
         return portfolio
 
 
-class Optimizer(RemoteDataAccessMixin):
+class Optimizer(object):
 
     def __init__(self):
         data = self.get_data()

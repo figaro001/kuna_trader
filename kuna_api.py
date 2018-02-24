@@ -7,8 +7,7 @@ from collections import OrderedDict
 from urllib.parse import urlencode
 
 import requests
-
-from . import credentials
+import credentials
 
 
 class KunaApiClient(object):
