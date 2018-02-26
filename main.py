@@ -62,7 +62,7 @@ def main():
     data = data.set_index('timestamp')
     data = data.to_json()
     data = json.loads(data)
-    data = [ [int(x[0]), x[1] ] for x in data['sell'].items() ]
+    data = [ [int(x[0].split('.')[0]), x[1] ] for x in data['sell'].items() ]
 
     return render_template('index.html',
                            at=at,
@@ -117,4 +117,4 @@ def tick():
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
-# celery worker -A main.celery -B --loglevel=info
+# celery worker -A main.celery -B --loglevel=warning
