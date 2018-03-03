@@ -83,7 +83,7 @@ class KunaTrader(object):
 
             deals = self.api_client.get_trades_history()
             buy_deals = list(filter(lambda x: x['side']=='bid', deals))
-            latest_spending = buy_deals[0]['fund']
+            latest_spending = float(buy_deals[0]['funds'])
 
             if (latest_spending - potential_income) < self.STOP_LOSS:
                 msg = 'STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'
