@@ -385,8 +385,34 @@ Highcharts.setOptions(Highcharts.theme);
         },
 
         rangeSelector: {
-            selected: 1,
-            allButtonsEnabled: true
+             buttons: [
+                 {
+                     type: 'hour',
+                     count: 1,
+                     text: '1h'
+                 },
+                 {
+                     type: 'hour',
+                     count: 4,
+                     text: '4h'
+                 },
+                 {
+                     type: 'day',
+                     count: 1,
+                     text: '1D'
+                 },
+                 {
+                     type: 'month',
+                     count: 1,
+                     text: '1M'
+                 },
+                 {
+                     type: 'all',
+                     count: 1,
+                     text: 'All'
+                 }
+                 ],
+            selected: 1
         },
 
         title: {

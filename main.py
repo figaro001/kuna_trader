@@ -12,8 +12,8 @@ from kuna_api import KunaApiClient
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.csv')
-#DATA_URL = 'http://192.168.0.100:5000/data'
-DATA_URL = 'http://localhost:5000/data'
+DATA_URL = 'http://192.168.0.105:5000/data'
+#DATA_URL = 'http://localhost:5000/data'
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'bot', 'trader.log')
 
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def main():
     data = data.set_index('timestamp')
     data = data.to_json()
     data = json.loads(data)
-    data = [ [int(x[0].split('.')[0]), x[1] ] for x in data['sell'].items() ]
+    data = [ [int(x[0].split('.')[0])*1000, x[1] ] for x in data['sell'].items() ]
 
     return render_template('index.html',
                            at=at,
