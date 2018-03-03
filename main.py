@@ -13,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.csv')
 DATA_URL = 'http://192.168.0.105:5000/data'
 #DATA_URL = 'http://localhost:5000/data'
-LOG_FILE_PATH = os.path.join(BASE_DIR, 'bot', 'trader.log')
+LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'celery_supervisor_err.log')
 
 app = Flask(__name__)
 app.config['CELERY_BROKER_URL'] = 'amqp://myuser:mypassword@localhost:5672/myvhost'
@@ -51,11 +51,11 @@ def main():
     at = datetime.fromtimestamp(eth_tick['at'])
     orders = client.get_active_orders()
     deals = client.get_trades_history()
-    deals = [x for x in deals if x['market']=='ethuah'][:10]
+    deals = [x for x in deals if x['market']=='ethuah'][:3]
 
     with open(LOG_FILE_PATH, 'r') as f:
         logs = f.read()
-    logs = logs.splitlines()[-10:]
+    logs = logs.splitlines()[-5:]
 
     data = pd.read_csv(DATA_FILE_PATH, index_col=0)
     data = data.set_index('timestamp')
@@ -103,7 +103,6 @@ def save_history():
                        'vol': data['ticker']['vol']}, index=[0])
     historical_data = pd.concat([historical_data, df])
     historical_data.to_csv(DATA_FILE_PATH)
-    print('saved')
 
 
 @celery.task()
