@@ -99,7 +99,7 @@ class KunaTrader(object):
 
         logger.info('signal: {}'.format(signal))
 
-        self.stop_loss()
+        #self.stop_loss()
 
         if signal == -1:  # sell
             self.sell()
