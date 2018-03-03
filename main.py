@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from celery import Celery, chain
@@ -60,9 +59,7 @@ def main():
 
     data = pd.read_csv(DATA_FILE_PATH, index_col=0)
     data = data.set_index('timestamp')
-    data = data.to_json()
-    data = json.loads(data)
-    data = [ [int(x[0].split('.')[0])*1000, x[1] ] for x in data['sell'].items() ]
+    data = [ [(x[0]+2*60*60)*1000, x[1] ] for x in data['sell'].items() ]
 
     return render_template('index.html',
                            at=at,
