@@ -59,6 +59,12 @@ def main():
 
     data = pd.read_csv(DATA_FILE_PATH, index_col=0)
     data = data.set_index('timestamp')
+
+    data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
+    data['long_mavg'] = data['sell'].rolling(window=104, min_periods=1, center=False).mean()
+
+    data_long = [[(x[0] + 2 * 60 * 60) * 1000, x[1]] for x in data['long_mavg'].items()]
+    data_short = [[(x[0] + 2 * 60 * 60) * 1000, x[1]] for x in data['short_mavg'].items()]
     data = [ [(x[0]+2*60*60)*1000, x[1] ] for x in data['sell'].items() ]
 
     return render_template('index.html',
@@ -69,6 +75,8 @@ def main():
                            logs=logs,
                            deals=deals,
                            data=data,
+                           data_s=data_short,
+                           data_l=data_long,
                            )
 
 
@@ -112,5 +120,3 @@ def tick():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-# celery worker -A main.celery -B --loglevel=warning

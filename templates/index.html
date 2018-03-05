@@ -414,7 +414,16 @@
             tooltip: {
                 valueDecimals: 2
             }
-        }]
+           },
+           {
+            name: 'Short MAVG',
+            data: {{ data_s|safe }},
+           },
+        {
+            name: 'Long MAVG',
+            data: {{ data_l|safe }},
+           }
+        ]
     });
 
     })
