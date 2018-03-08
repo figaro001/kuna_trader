@@ -147,12 +147,16 @@
     <div class="col-md-4">
       <table class="table table-striped table-bordered table-sm">
         <caption>Active Orders</caption>
+        <thead>
+        <tr><th>date</th><th>side</th><th>amount</th><th>price</th></tr>
+        </thead>
         <tbody>
         {% for order in orders %}
         <tr>
-          <td>
-            {{ order }}
-          </td>
+          <td>{{ order.created_at|shortdate }}</td>
+          <td>{{ order.side }}</td>
+          <td>{{ order.volume }}</td>
+          <td>{{ order.price }}</td>
         </tr>
         {% endfor %}
         </tbody>

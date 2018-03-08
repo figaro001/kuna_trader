@@ -66,7 +66,7 @@ def main():
 
     session = Session()
     logs = []
-    for log in session.query(Log).order_by(Log.date.desc())[:5]:
+    for log in session.query(Log).filter(Log.signal!=0).order_by(Log.date.desc())[:5]:
         logs.append({'date':log.date,
                      'signal': log.signal,
                      'action': log.action,
