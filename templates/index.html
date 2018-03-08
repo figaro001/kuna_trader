@@ -96,13 +96,17 @@
         <caption>Logs</caption>
         <thead>
         <tr>
-          <th>Last 5 records</th>
+          <th>At</th><th>Signal</th><th>act</th><th>Status</th><th>Cmnt</th>
         </tr>
         </thead>
         <tbody>
-        {% for line in logs %}
+        {% for log in logs %}
         <tr>
-          <td>{{ line }}</td>
+          <td>{{ log.date|logdate }}</td>
+          <td>{{ log.signal }}</td>
+          <td>{{ log.action }}</td>
+          <td>{{ log.status }}</td>
+          <td>{{ log.comment }}</td>
         </tr>
         {% endfor %}
         </tbody>

@@ -1,6 +1,6 @@
 *.pyc
 __pycache__
-
+bot/journal.db
 data/*
 logs/*
 .idea/

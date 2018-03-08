@@ -1,13 +1,15 @@
 import os
 import sqlite3
 from datetime import datetime
+
 from celery import Celery, chain
 from celery.schedules import crontab
-
 from flask import Flask, Response, render_template
-from bot.trader import KunaTrader
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 import pandas as pd
+from bot.trader import JOURNAL_DB_PATH, KunaTrader, Log
 from kuna_api import KunaApiClient
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +18,9 @@ DB_DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.db')
 DATA_URL = 'http://192.168.0.105:5000/data'
 #DATA_URL = 'http://localhost:5000/data'
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'celery_supervisor_err.log')
+
+engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
+Session = sessionmaker(bind=engine)
 
 app = Flask(__name__)
 app.config['CELERY_BROKER_URL'] = 'amqp://myuser:mypassword@localhost:5672/myvhost'
@@ -39,10 +44,14 @@ def format_currency(value):
 def shortdate(value):
     try:
         value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
-        value = value.strftime('%d-%m-%y %H:%M')
+        value = value.strftime('%d/%m %H:%M')
     except:
         pass
     return value
+
+@app.template_filter('logdate')
+def logdate(value):
+    return value.strftime('%d/%m %H:%M')
 
 
 @app.route('/')
@@ -53,11 +62,17 @@ def main():
     at = datetime.fromtimestamp(eth_tick['at'])
     orders = client.get_active_orders()
     deals = client.get_trades_history()
-    deals = [x for x in deals if x['market']=='ethuah'][:3]
+    deals = [x for x in deals if x['market']=='ethuah'][:5]
 
-    with open(LOG_FILE_PATH, 'r') as f:
-        logs = f.read()
-    logs = logs.splitlines()[-5:]
+    session = Session()
+    logs = []
+    for log in session.query(Log).order_by(Log.date.desc())[:5]:
+        logs.append({'date':log.date,
+                     'signal': log.signal,
+                     'action': log.action,
+                     'status': log.status,
+                     'comment': log.comment
+                    })
 
     data = pd.read_csv(CSV_DATA_FILE_PATH, index_col=0)
     data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
