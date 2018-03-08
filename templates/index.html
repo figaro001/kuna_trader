@@ -412,16 +412,22 @@
             name: 'ETH',
             data: {{ data|safe }},
             tooltip: {
-                valueDecimals: 2
+                valueDecimals: 0
             }
            },
            {
-            name: 'Short MAVG',
+            name: 'SMAVG',
             data: {{ data_s|safe }},
+            tooltip: {
+                valueDecimals: 0
+            }
            },
         {
-            name: 'Long MAVG',
+            name: 'LMAVG',
             data: {{ data_l|safe }},
+            tooltip: {
+                valueDecimals: 0
+            }
            }
         ]
     });

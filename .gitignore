@@ -1,7 +1,8 @@
 *.pyc
 __pycache__
-*.log
-*.csv
+
+data/*
+logs/*
 .idea/
 credentials.py
 venv/

@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.csv')
 DB_DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.db')
 DATA_URL = 'http://192.168.0.105:5000/data'
+#DATA_URL = 'http://localhost:5000/data'
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'celery_supervisor_err.log')
 
 app = Flask(__name__)
@@ -59,15 +60,12 @@ def main():
     logs = logs.splitlines()[-5:]
 
     data = pd.read_csv(CSV_DATA_FILE_PATH, index_col=0)
-
     data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
     data['long_mavg'] = data['sell'].rolling(window=104, min_periods=1, center=False).mean()
-
     data.index = pd.to_datetime(data.index)
-
-    data_long =  [[x[0].timestamp()*1000, x[1]] for x in data['long_mavg'].items()]
-    data_short = [[x[0].timestamp()*1000, x[1]] for x in data['short_mavg'].items()]
-    data =       [[x[0].timestamp()*1000, x[1]] for x in data['sell'].items() ]
+    data_long =  [[x[0].timestamp()*1000, round(x[1],0)] for x in data['long_mavg'].items()]
+    data_short = [[x[0].timestamp()*1000, round(x[1],0)] for x in data['short_mavg'].items()]
+    data =       [[x[0].timestamp()*1000, round(x[1],0)] for x in data['sell'].items() ]
 
     return render_template('index.html',
                            at=at,
