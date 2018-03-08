@@ -62,7 +62,6 @@ class KunaTrader(object):
 
         if result.status_code == 201:
             self.log.status = 'success'
-            self.log.comment = 'Sell order placed succesfully'
         else:
             self.log.status = 'error'
             self.log.coment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
@@ -73,11 +72,11 @@ class KunaTrader(object):
         rate = self.api_client.get_eth_buy_rate()
         volume = str(float(self.TRADING_UAH_AMOUNT) / rate)[:8]
 
-        self.log.action = 'Buy initiated. Amount: {} Rate: {} Cash Spent: {}'.format(volume, rate, float(volume)*rate)
+        self.log.action = 'Buy. Volume: {} Price: {}'.format(volume, rate)
 
         if float(available_cash) < float(volume) * rate:
             self.log.status = 'error'
-            self.log.comment = 'Not enough cash for deal. Needed: {}  Actual:{}'.format(rate*float(volume), available_cash)
+            self.log.comment = 'Not enough cash. Needed: {}  Actual:{}'.format(rate*float(volume), available_cash)
             return
         if orders:
             self.log.status = 'error'
@@ -88,7 +87,6 @@ class KunaTrader(object):
 
         if result.status_code == 201:
             self.log.status = 'success'
-            self.log.comment = 'Buy order placed succesfully'
         else:
             self.log.status = 'error'
             self.log.coment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
