@@ -21,6 +21,9 @@
       caption-side: top;
       padding: 0;
     }
+    table.logs .at{
+      width: 100px;
+    }
   </style>
 
   <title>KClient</title>
@@ -91,22 +94,28 @@
   <br>
 
   <div class="row">
-    <div class="col-md-12">
-      <table class="table table-striped table-bordered table-sm table-hover">
+    <div class="col-md-4">
+      <table class="table table-striped table-bordered table-sm table-hover logs">
         <caption>Logs</caption>
         <thead>
         <tr>
-          <th>At</th><th>Signal</th><th>act</th><th>Status</th><th>Cmnt</th>
+          <th class="at">At</th><th>Signal</th><th>Cmnt</th>
         </tr>
         </thead>
         <tbody>
         {% for log in logs %}
-        <tr>
+        <tr class="{% if log.status == 'success' %}table-success{% else %}table-warning{% endif %}">
           <td>{{ log.date|logdate }}</td>
-          <td>{{ log.signal }}</td>
-          <td>{{ log.action }}</td>
-          <td>{{ log.status }}</td>
-          <td>{{ log.comment }}</td>
+          <td>
+            {% if log.signal==1 %}
+             Buy
+            {% else %}
+             Sell
+            {% endif %}
+          </td>
+          <td>
+            {{ log.comment if log.comment != None }}
+          </td>
         </tr>
         {% endfor %}
         </tbody>
