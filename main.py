@@ -69,9 +69,10 @@ def main():
     for log in session.query(Log).filter(Log.signal!=0).order_by(Log.date.desc())[:5]:
         logs.append({'date':log.date,
                      'signal': log.signal,
-                     'action': log.action,
                      'status': log.status,
-                     'comment': log.comment
+                     'comment': log.comment,
+                     'volume': log.volume,
+                     'rate': log.rate,
                     })
 
     data = pd.read_csv(CSV_DATA_FILE_PATH, index_col=0)

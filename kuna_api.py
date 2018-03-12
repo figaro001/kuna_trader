@@ -39,6 +39,8 @@ class KunaApiClient(object):
                   'price': price}
         url = self._build_personal_url(self.ORDERS_URL, 'POST', params)
         r = requests.post(url, params)
+        # r = requests.Response()
+        # r.status_code = 200
         return r
 
     def buy_eth(self, volume, price):
@@ -48,13 +50,15 @@ class KunaApiClient(object):
                   'price': price}
         url = self._build_personal_url(self.ORDERS_URL, 'POST', params)
         r = requests.post(url, params)
+        # r = requests.Response()
+        # r.status_code = 200
         return r
 
     def get_currency_balance(self, currency_name):
         r = requests.get(self._build_personal_url(self.ME_URL, 'GET', {}))
         r.raise_for_status()
         r = json.loads(r.content.decode('utf-8'))
-        return [x for x in r['accounts'] if x['currency']==currency_name][0]['balance']
+        return [x for x in r['accounts'] if x['currency'] == currency_name][0]['balance']
 
     def get_balance(self):
         r = requests.get(self._build_personal_url(self.ME_URL, 'GET', {}))

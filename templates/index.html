@@ -99,7 +99,11 @@
         <caption>Logs</caption>
         <thead>
         <tr>
-          <th class="at">At</th><th>Signal</th><th>Cmnt</th>
+          <th class="at">At</th>
+          <th>Side</th>
+          <th>Vol</th>
+          <th>Rate</th>
+          <th>Cmnt</th>
         </tr>
         </thead>
         <tbody>
@@ -113,6 +117,8 @@
              Sell
             {% endif %}
           </td>
+          <td>{{ log.volume }}</td>
+          <td>{{ log.rate }}</td>
           <td>
             {{ log.comment if log.comment != None }}
           </td>
