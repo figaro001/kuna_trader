@@ -70,6 +70,9 @@ class KunaTrader(object):
             self.log.status = 'error'
             self.log.coment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
 
+        self.session.add(self.log)
+        self.session.commit()
+
     def buy(self):
         available_cash = self.api_client.get_currency_balance('uah')[:8]
         orders = self.api_client.get_active_orders()
@@ -95,6 +98,9 @@ class KunaTrader(object):
         else:
             self.log.status = 'error'
             self.log.coment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
+
+        self.session.add(self.log)
+        self.session.commit()
 
     def stop_loss(self):
         available_volume = float(self.api_client.get_currency_balance('eth'))
@@ -127,6 +133,3 @@ class KunaTrader(object):
 
         elif signal == 1:  # buy
             self.buy()
-
-        self.session.add(self.log)
-        self.session.commit()

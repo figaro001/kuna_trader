@@ -136,11 +136,5 @@ def tick():
     chain(save_history.s(), process_signals.s())()
 
 
-def change_format():
-    df = pd.read_csv(CSV_DATA_FILE_PATH, index_col=0)
-    df['timestamp'] = df['timestamp'].apply(lambda x: datetime.fromtimestamp(x))
-    df = df.set_index('timestamp')
-    df.to_csv(CSV_DATA_FILE_PATH+'.new')
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
