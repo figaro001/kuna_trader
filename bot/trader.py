@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy import Column, DateTime, Integer, String, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -14,18 +14,21 @@ engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
+
 class Log(Base):
-     __tablename__ = 'journal'
+    __tablename__ = 'journal'
 
-     id = Column(Integer, primary_key=True)
-     date = Column(DateTime)
-     signal = Column(Integer)
-     action = Column(String)
-     status = Column(String)
-     comment = Column(String)
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime)
+    signal = Column(Integer)
+    volume = Column(Float)
+    rate = Column(Float)
+    status = Column(String)
+    comment = Column(String)
 
-     def __repr__(self):
+    def __repr__(self):
         return "{} at {}".format(self.signal, self.date)
+
 
 Base.metadata.create_all(engine)
 
@@ -46,7 +49,8 @@ class KunaTrader(object):
         available_volume = self.api_client.get_currency_balance('eth')[:8]
         rate = self.api_client.get_eth_sell_rate()
 
-        self.log.action = 'Sell. Volume:{} Price:{}'.format(available_volume, rate)
+        self.log.volume = available_volume
+        self.log.rate = rate
 
         if orders:
             self.log.status = 'error'
@@ -55,7 +59,7 @@ class KunaTrader(object):
 
         if float(available_volume) < 0.01:
             self.log.status = 'error'
-            self.log.comment = 'To low ETH amount. {}'.format(available_volume)
+            self.log.comment = 'Not enough ETH: {}'.format(available_volume)
             return
 
         result = self.api_client.sell_eth(available_volume, rate)
@@ -72,11 +76,12 @@ class KunaTrader(object):
         rate = self.api_client.get_eth_buy_rate()
         volume = str(float(self.TRADING_UAH_AMOUNT) / rate)[:8]
 
-        self.log.action = 'Buy. Volume: {} Price: {}'.format(volume, rate)
+        self.log.volume = volume
+        self.log.rate = rate
 
         if float(available_cash) < float(volume) * rate:
             self.log.status = 'error'
-            self.log.comment = 'Not enough cash. Needed: {}  Actual:{}'.format(rate*float(volume), available_cash)
+            self.log.comment = 'Not enough UAH. Needed:{}  Actual:{}'.format(rate*float(volume), available_cash)
             return
         if orders:
             self.log.status = 'error'
@@ -99,12 +104,12 @@ class KunaTrader(object):
             potential_income = float(self.api_client.get_currency_balance('eth')) * rate
 
             deals = self.api_client.get_trades_history()
-            buy_deals = list(filter(lambda x: x['side']=='bid', deals))
+            buy_deals = list(filter(lambda x: x['side'] == 'bid', deals))
             latest_spending = float(buy_deals[0]['funds'])
 
             if (latest_spending - potential_income) < self.STOP_LOSS:
-                msg = 'STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'
-                msg = msg.format(rate, latest_spending, potential_income)
+                # msg = 'STOP LOSS triggered. rate: {} latest_spending: {} potential_income: {}'
+                # msg = msg.format(rate, latest_spending, potential_income)
                 self.sell()
 
     def process_latest_signal(self):
@@ -115,7 +120,7 @@ class KunaTrader(object):
 
         self.log.signal = signal
 
-        #self.stop_loss()
+        # self.stop_loss()
 
         if signal == -1:  # sell
             self.sell()
