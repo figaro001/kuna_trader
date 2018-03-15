@@ -105,6 +105,7 @@ def historical():
 
 @celery.task()
 def process_signals(_):
+    pass
     #KunaTrader(data_url=DATA_URL).process_latest_signal()
 
 
