@@ -4,7 +4,7 @@ from datetime import datetime
 
 from celery import Celery, chain
 from celery.schedules import crontab
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, render_template, request, redirect, url_for
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
@@ -15,8 +15,8 @@ from kuna_api import KunaApiClient
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.csv')
 DB_DATA_FILE_PATH = os.path.join(BASE_DIR, 'data', 'historical.db')
-DATA_URL = 'http://192.168.0.105:5000/data'
-#DATA_URL = 'http://localhost:5000/data'
+#DATA_URL = 'http://192.168.0.105:5000/data'
+DATA_URL = 'http://localhost:5000/data'
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'celery_supervisor_err.log')
 
 engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
@@ -38,7 +38,6 @@ celery.conf.beat_schedule = {
 def format_currency(value):
     value = float(value)
     return "{:,.2f}".format(value)
-
 
 @app.template_filter('shortdate')
 def shortdate(value):
@@ -67,9 +66,9 @@ def main():
 
         session = Session()
         logs = []
-        for log in session.query(Log).filter(Log.signal!=0).order_by(Log.date.desc())[:5]:
+        for log in session.query(Log).order_by(Log.date.desc())[:5]:
             logs.append({'date':log.date,
-                         'signal': log.signal,
+                         'side': log.side,
                          'status': log.status,
                          'comment': log.comment,
                          'volume': log.volume,
@@ -97,7 +96,12 @@ def main():
                                )
 
     if request.method == 'POST':
-        return Response(response=request.form, status=200)
+        bid = request.form['action']
+        if bid == 'sell':
+            KunaTrader(DATA_URL).sell()
+        if bid == 'buy':
+            KunaTrader(DATA_URL).buy()
+        return redirect(url_for('main'))
 
 
 @app.route('/data')

@@ -20,7 +20,7 @@ class Log(Base):
 
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
-    signal = Column(Integer)
+    side = Column(Integer)
     volume = Column(Float)
     rate = Column(Float)
     status = Column(String)
@@ -51,6 +51,7 @@ class KunaTrader(object):
 
         self.log.volume = available_volume
         self.log.rate = rate
+        self.log.side = 'sell'
 
         if orders:
             self.log.status = 'error'
@@ -81,6 +82,7 @@ class KunaTrader(object):
 
         self.log.volume = volume
         self.log.rate = rate
+        self.log.side = 'buy'
 
         if float(available_cash) < float(volume) * rate:
             self.log.status = 'error'
@@ -123,8 +125,6 @@ class KunaTrader(object):
         strategy = strategies.RollingMeanStrategy(self.data_url, 93, 104)
         signals = strategy.fill_signals()
         signal = signals.tail(1).signals.item()
-
-        self.log.signal = signal
 
         # self.stop_loss()
 

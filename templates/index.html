@@ -17,12 +17,19 @@
     table {
       font-size: 86%;
     }
-    caption{
+
+    caption {
       caption-side: top;
       padding: 0;
     }
-    table.logs .at{
+
+    table.logs .at {
       width: 100px;
+    }
+    .action-btns{
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
     }
   </style>
 
@@ -60,28 +67,39 @@
         </tbody>
       </table>
     </div>
-    <div class="col-md-6">
-       <table class="table table-striped table-bordered table-sm">
+    <div class="col-md-4">
+      <table class="table table-striped table-bordered table-sm">
         <caption>Coins</caption>
         <thead>
         <tr>
           {% for account in actives %}
-            {% if account.balance != '0.0' %}
-              <td>{{ account.currency|upper }}</td>
-            {% endif %}
+          {% if account.balance != '0.0' %}
+          <td>{{ account.currency|upper }}</td>
+          {% endif %}
           {% endfor %}
         </tr>
         </thead>
         <tbody>
         <tr>
           {% for account in actives %}
-            {% if account.balance != '0.0' %}
-              <td>{{ account.balance }}</td>
-            {% endif %}
+          {% if account.balance != '0.0' %}
+          <td>{{ account.balance }}</td>
+          {% endif %}
           {% endfor %}
         </tr>
         </tbody>
       </table>
+    </div>
+    <div class="col-md-2 action-btns">
+      <form action="" method="post">
+        <input type="hidden" name="action" value="sell"/>
+        <button type="submit" class="btn btn-warning btn-sm">SELL</button>
+      </form>
+
+      <form action="" method="post">
+        <input type="hidden" name="action" value="buy"/>
+        <button type="submit" class="btn btn-success btn-sm">BUY</button>
+      </form>
     </div>
   </div>
 
@@ -110,13 +128,7 @@
         {% for log in logs %}
         <tr class="{% if log.status == 'success' %}table-success{% else %}table-warning{% endif %}">
           <td>{{ log.date|logdate }}</td>
-          <td>
-            {% if log.signal==1 %}
-             Buy
-            {% else %}
-             Sell
-            {% endif %}
-          </td>
+          <td>{{ log.side }}</td>
           <td>{{ log.volume }}</td>
           <td>{{ log.rate }}</td>
           <td>
@@ -141,19 +153,21 @@
         </thead>
         <tbody>
         {% for deal in deals %}
-            <tr {% if deal.side=='ask' %} class="table-info" {% else %}class="table-danger"{% endif %}>
-              <td>
-                {{ deal.created_at|shortdate }}
-                {% if deal.side == 'ask' %}
-                    <img src="https://kuna.io/assets/icons/default/trade_buy-fbdde88afadf0e5b9e20bf64efd2402648b529656e7cdc8cbd8b53e96f28e869.png">
-                {% else %}
-                    <img src="https://kuna.io/assets/icons/default/trade_sell-88a76cf69aea3ee9821941ec46582607ad870fb27e7dbbaca37e75cbba7dbf35.png">
-                {% endif %}
-              </td>
-              <td> {{ deal.price|currency }}</td>
-              <td> {{ deal.volume }}</td>
-              <td> {{ deal.funds|currency }}</td>
-            </tr>
+        <tr {% if deal.side=='ask' %} class="table-info" {% else %}class="table-danger" {% endif %}>
+          <td>
+            {{ deal.created_at|shortdate }}
+            {% if deal.side == 'ask' %}
+            <img
+                src="https://kuna.io/assets/icons/default/trade_buy-fbdde88afadf0e5b9e20bf64efd2402648b529656e7cdc8cbd8b53e96f28e869.png">
+            {% else %}
+            <img
+                src="https://kuna.io/assets/icons/default/trade_sell-88a76cf69aea3ee9821941ec46582607ad870fb27e7dbbaca37e75cbba7dbf35.png">
+            {% endif %}
+          </td>
+          <td> {{ deal.price|currency }}</td>
+          <td> {{ deal.volume }}</td>
+          <td> {{ deal.funds|currency }}</td>
+        </tr>
         {% endfor %}
         </tbody>
       </table>
@@ -163,7 +177,12 @@
       <table class="table table-striped table-bordered table-sm">
         <caption>Active Orders</caption>
         <thead>
-        <tr><th>date</th><th>side</th><th>amount</th><th>price</th></tr>
+        <tr>
+          <th>date</th>
+          <th>side</th>
+          <th>amount</th>
+          <th>price</th>
+        </tr>
         </thead>
         <tbody>
         {% for order in orders %}
@@ -176,21 +195,6 @@
         {% endfor %}
         </tbody>
       </table>
-
-      <div class="col-md-3">
-      <form action="" method="post">
-        <input type="hidden" name="action" value="sell"/>
-        <button type="submit" class="btn btn-warning btn-sm">SELL</button>
-      </form>
-        </div>
-
-      <div class="col-md-3">
-      <form action="" method="post">
-        <input type="hidden" name="action" value="buy"/>
-        <button type="submit" class="btn btn-success btn-sm">BUY</button>
-      </form>
-      </div>
-
     </div>
   </div>
 
@@ -201,7 +205,10 @@
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
 <script type="text/javascript">
-    $(document).ready(function (){
+    $(document).ready(function () {
+        var ethData = {{ data|safe }}
+        var sData = {{ data_s|safe }}
+        var lData = {{ data_l|safe }}
 
         Highcharts.theme = {
         colors: ['#2b908f', '#90ee7e', '#f45b5b', '#7798BF', '#aaeeee', '#ff0066',
@@ -448,21 +455,21 @@
 
         series: [{
             name: 'ETH',
-            data: {{ data|safe }},
+            data: ethData,
             tooltip: {
                 valueDecimals: 0
             }
            },
            {
             name: 'SMAVG',
-            data: {{ data_s|safe }},
+            data: sData,
             tooltip: {
                 valueDecimals: 0
             }
            },
         {
             name: 'LMAVG',
-            data: {{ data_l|safe }},
+            data: lData,
             tooltip: {
                 valueDecimals: 0
             }
