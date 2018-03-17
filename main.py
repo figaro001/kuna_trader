@@ -4,11 +4,11 @@ from datetime import datetime
 
 from celery import Celery, chain
 from celery.schedules import crontab
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
 import pandas as pd
+
 from bot.trader import JOURNAL_DB_PATH, KunaTrader, Log
 from kuna_api import KunaApiClient
 
@@ -54,46 +54,50 @@ def logdate(value):
     return value.strftime('%d/%m %H:%M')
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def main():
     client = KunaApiClient()
-    eth_tick = client.get_tick()
-    actives = client.get_balance()
-    at = datetime.fromtimestamp(eth_tick['at'])
-    orders = client.get_active_orders()
-    deals = client.get_trades_history()
-    deals = [x for x in deals if x['market']=='ethuah'][:5]
+    if request.method == 'GET':
+        eth_tick = client.get_tick()
+        actives = client.get_balance()
+        at = datetime.fromtimestamp(eth_tick['at'])
+        orders = client.get_active_orders()
+        deals = client.get_trades_history()
+        deals = [x for x in deals if x['market']=='ethuah'][:5]
 
-    session = Session()
-    logs = []
-    for log in session.query(Log).filter(Log.signal!=0).order_by(Log.date.desc())[:5]:
-        logs.append({'date':log.date,
-                     'signal': log.signal,
-                     'status': log.status,
-                     'comment': log.comment,
-                     'volume': log.volume,
-                     'rate': log.rate,
-                    })
+        session = Session()
+        logs = []
+        for log in session.query(Log).filter(Log.signal!=0).order_by(Log.date.desc())[:5]:
+            logs.append({'date':log.date,
+                         'signal': log.signal,
+                         'status': log.status,
+                         'comment': log.comment,
+                         'volume': log.volume,
+                         'rate': log.rate,
+                        })
 
-    data = pd.read_csv(CSV_DATA_FILE_PATH, index_col=0)
-    data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
-    data['long_mavg'] = data['sell'].rolling(window=104, min_periods=1, center=False).mean()
-    data.index = pd.to_datetime(data.index)
-    data_long =  [[x[0].timestamp()*1000, round(x[1],0)] for x in data['long_mavg'].items()]
-    data_short = [[x[0].timestamp()*1000, round(x[1],0)] for x in data['short_mavg'].items()]
-    data =       [[x[0].timestamp()*1000, round(x[1],0)] for x in data['sell'].items() ]
+        data = pd.read_csv(CSV_DATA_FILE_PATH, index_col=0)
+        data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
+        data['long_mavg'] = data['sell'].rolling(window=104, min_periods=1, center=False).mean()
+        data.index = pd.to_datetime(data.index)
+        data_long =  [[x[0].timestamp()*1000, round(x[1],0)] for x in data['long_mavg'].items()]
+        data_short = [[x[0].timestamp()*1000, round(x[1],0)] for x in data['short_mavg'].items()]
+        data =       [[x[0].timestamp()*1000, round(x[1],0)] for x in data['sell'].items() ]
 
-    return render_template('index.html',
-                           at=at,
-                           eth_tick=eth_tick,
-                           actives=actives,
-                           orders=orders,
-                           logs=logs,
-                           deals=deals,
-                           data=data,
-                           data_s=data_short,
-                           data_l=data_long,
-                           )
+        return render_template('index.html',
+                               at=at,
+                               eth_tick=eth_tick,
+                               actives=actives,
+                               orders=orders,
+                               logs=logs,
+                               deals=deals,
+                               data=data,
+                               data_s=data_short,
+                               data_l=data_long,
+                               )
+
+    if request.method == 'POST':
+        return Response(response=request.form, status=200)
 
 
 @app.route('/data')
