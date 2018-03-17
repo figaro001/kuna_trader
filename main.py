@@ -45,6 +45,8 @@ def shortdate(value):
         value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
         value = value.strftime('%d/%m %H:%M')
     except:
+        value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S+02:00')
+        value = value.strftime('%d/%m %H:%M')
         pass
     return value
 
