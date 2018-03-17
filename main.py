@@ -4,7 +4,7 @@ from datetime import datetime
 
 from celery import Celery, chain
 from celery.schedules import crontab
-from flask import Flask, Response, render_template, request, redirect, url_for
+from flask import Flask, Response, render_template, request, redirect, url_for, send_from_directory
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
@@ -22,7 +22,7 @@ LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'celery_supervisor_err.log')
 engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
 Session = sessionmaker(bind=engine)
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.config['CELERY_BROKER_URL'] = 'amqp://myuser:mypassword@localhost:5672/myvhost'
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
@@ -54,6 +54,9 @@ def shortdate(value):
 def logdate(value):
     return value.strftime('%d/%m %H:%M')
 
+@app.route('/static/<path:path>')
+def send_js(path):
+    return send_from_directory('static', path)
 
 @app.route('/', methods=['GET', 'POST'])
 def main():

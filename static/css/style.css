@@ -1,0 +1,18 @@
+table {
+    font-size: 86%;
+}
+
+caption {
+    caption-side: top;
+    padding: 0;
+}
+
+table.logs .at {
+    width: 100px;
+}
+
+.action-btns {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
