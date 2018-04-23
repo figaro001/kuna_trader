@@ -45,9 +45,8 @@ def shortdate(value):
         value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
         value = value.strftime('%d/%m %H:%M')
     except:
-        value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S+02:00')
+        value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S+03:00')
         value = value.strftime('%d/%m %H:%M')
-        pass
     return value
 
 @app.template_filter('logdate')
@@ -84,9 +83,9 @@ def main():
         data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
         data['long_mavg'] = data['sell'].rolling(window=104, min_periods=1, center=False).mean()
         data.index = pd.to_datetime(data.index)
-        data_long =  [[x[0].timestamp()*1000, round(x[1],0)] for x in data['long_mavg'].items()]
-        data_short = [[x[0].timestamp()*1000, round(x[1],0)] for x in data['short_mavg'].items()]
-        data =       [[x[0].timestamp()*1000, round(x[1],0)] for x in data['sell'].items() ]
+        data_long =  [[x[0].timestamp()*1000, round(x[1],0)] for x in data['long_mavg'].items() if not pd.isnull(x[0])]
+        data_short = [[x[0].timestamp()*1000, round(x[1],0)] for x in data['short_mavg'].items() if not pd.isnull(x[0])]
+        data =       [[x[0].timestamp()*1000, round(x[1],0)] for x in data['sell'].items() if not pd.isnull(x[0])]
 
         return render_template('index.html',
                                at=at,
