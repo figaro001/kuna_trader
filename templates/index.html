@@ -159,6 +159,7 @@
           <th>side</th>
           <th>amount</th>
           <th>price</th>
+          <th></th>
         </tr>
         </thead>
         <tbody>
@@ -168,6 +169,13 @@
           <td>{{ order.side }}</td>
           <td>{{ order.volume }}</td>
           <td>{{ order.price }}</td>
+          <td>
+            <form action="" method="post">
+              <input type="hidden" value="{{ order.id }}" name="order-id"/>
+              <input type="hidden" value="cancel-order" name="action"/>
+              <button class="btn btn-sm btn-warning">Cancel</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
         </tbody>

@@ -15,6 +15,7 @@ class KunaApiClient(object):
     API_DOMAIN = 'https://kuna.io/api/v2'
     TICKERS_URL = '{}/tickers/ethuah'.format(API_DOMAIN)
     ORDERS_URL = '{}/orders'.format(API_DOMAIN)
+    ORDER_DELETE_URL = '{}/order/delete'.format(API_DOMAIN)
     TRADES_URL = '{}/trades/my'.format(API_DOMAIN)
     ME_URL = '{}/members/me'.format(API_DOMAIN)
 
@@ -96,3 +97,8 @@ class KunaApiClient(object):
         r.raise_for_status()
         r = json.loads(r.content.decode('utf-8'))
         return r
+
+    def cancel_order(self, order_id):
+        params = {'id': order_id}
+        url = self._build_personal_url(self.ORDER_DELETE_URL, 'POST', params)
+        return requests.post(url, params)

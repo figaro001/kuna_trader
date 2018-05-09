@@ -105,6 +105,8 @@ def main():
             KunaTrader(DATA_URL).sell()
         if bid == 'buy':
             KunaTrader(DATA_URL).buy()
+        if bid == 'cancel-order':
+            client.cancel_order(request.form['order-id'])
         return redirect(url_for('main'))
 
 
