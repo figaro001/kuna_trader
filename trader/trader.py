@@ -5,11 +5,12 @@ from sqlalchemy import Column, DateTime, Integer, String, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from kuna_api import KunaApiClient
+from api_client import KunaApiClient
 
 from . import strategies
 
-JOURNAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'journal.db')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+JOURNAL_DB_PATH = os.path.join(BASE_DIR, 'data', 'journal.db')
 engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
@@ -34,7 +35,6 @@ Base.metadata.create_all(engine)
 
 
 class KunaTrader(object):
-
     TRADING_UAH_AMOUNT = 6000
     STOP_LOSS = 300
 
@@ -69,7 +69,7 @@ class KunaTrader(object):
             self.log.status = 'success'
         else:
             self.log.status = 'error'
-            self.log.coment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
+            self.log.comment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
 
         self.session.add(self.log)
         self.session.commit()
@@ -86,7 +86,7 @@ class KunaTrader(object):
 
         if float(available_cash) < float(volume) * rate:
             self.log.status = 'error'
-            self.log.comment = 'Not enough UAH. Needed:{}  Actual:{}'.format(rate*float(volume), available_cash)
+            self.log.comment = 'Not enough UAH. Needed:{}  Actual:{}'.format(rate * float(volume), available_cash)
             return
         if orders:
             self.log.status = 'error'
@@ -125,7 +125,6 @@ class KunaTrader(object):
         strategy = strategies.RollingMeanStrategy(self.data_url, 93, 104)
         signals = strategy.fill_signals()
         signal = signals.tail(1).signals.item()
-
         # self.stop_loss()
 
         if signal == -1:  # sell

@@ -1,9 +1,7 @@
 *.pyc
 __pycache__
-bot/journal.db
 data/*
 logs/*
 .idea/
 credentials.py
-venv/
-celerybeat-schedule
+celerybeat-schedule*

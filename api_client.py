@@ -1,4 +1,3 @@
-
 import hashlib
 import hmac
 import json
@@ -7,11 +6,11 @@ from collections import OrderedDict
 from urllib.parse import urlencode
 
 import requests
+
 import credentials
 
 
 class KunaApiClient(object):
-
     API_DOMAIN = 'https://kuna.io/api/v2'
     TICKERS_URL = '{}/tickers/ethuah'.format(API_DOMAIN)
     ORDERS_URL = '{}/orders'.format(API_DOMAIN)
