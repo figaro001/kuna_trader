@@ -4,16 +4,13 @@ import pandas as pd
 
 class RollingMeanStrategy(object):
 
-    def __init__(self, data_url, short_window=8, long_window=10):
+    def __init__(self, conn, short_window=8, long_window=10):
         self.short_window = short_window
         self.long_window = long_window
-        self.data_url = data_url
-
-    def get_data(self):
-        return pd.read_json(self.data_url, orient='index')
+        self.conn = conn
 
     def fill_signals(self):
-        data = self.get_data()
+        data = pd.read_sql_query("SELECT * FROM tick", self.conn)
         data['position'] = 0.0
         data['short_mavg'] = data['sell'].rolling(window=self.short_window, min_periods=1, center=False).mean()
         data['long_mavg'] = data['sell'].rolling(window=self.long_window, min_periods=1, center=False).mean()

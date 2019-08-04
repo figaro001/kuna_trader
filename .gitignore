@@ -1,6 +1,6 @@
 *.pyc
 __pycache__
-data/*
+database.db
 logs/*
 .idea/
 credentials.py

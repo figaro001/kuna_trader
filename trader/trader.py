@@ -5,13 +5,14 @@ from sqlalchemy import Column, DateTime, Integer, String, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from api_client import KunaApiClient
+from api_client import KunaApiClient  # TODO: Fix
 
 from . import strategies
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-JOURNAL_DB_PATH = os.path.join(BASE_DIR, 'data', 'journal.db')
-engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
+DB_PATH = os.path.join(BASE_DIR, 'database.db')
+
+engine = create_engine('sqlite:///{}'.format(DB_PATH), echo=False)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
@@ -21,7 +22,7 @@ class Log(Base):
 
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
-    side = Column(Integer)
+    signal = Column(Integer)
     volume = Column(Float)
     rate = Column(Float)
     status = Column(String)
@@ -38,9 +39,9 @@ class KunaTrader(object):
     TRADING_UAH_AMOUNT = 6000
     STOP_LOSS = 300
 
-    def __init__(self, data_url):
+    def __init__(self, db_connection):
         self.api_client = KunaApiClient()
-        self.data_url = data_url
+        self.conn = db_connection
         self.session = Session()
         self.log = Log(date=datetime.now())
 
@@ -99,7 +100,7 @@ class KunaTrader(object):
             self.log.status = 'success'
         else:
             self.log.status = 'error'
-            self.log.coment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
+            self.log.comment = 'Failed. Status Code: {}. Error: {}'.format(result.status_code, result.content)
 
         self.session.add(self.log)
         self.session.commit()
@@ -122,7 +123,7 @@ class KunaTrader(object):
 
     def process_latest_signal(self):
 
-        strategy = strategies.RollingMeanStrategy(self.data_url, 93, 104)
+        strategy = strategies.RollingMeanStrategy(self.conn, 93, 104)
         signals = strategy.fill_signals()
         signal = signals.tail(1).signals.item()
         # self.stop_loss()
