@@ -1,5 +1,5 @@
 requests==2.18.4
 pandas==0.25.0
-flask==0.12.2
+flask==1.0
 celery==4.1.0
 sqlalchemy==1.2.3
