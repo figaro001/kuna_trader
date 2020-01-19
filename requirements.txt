@@ -1,6 +1,7 @@
 requests==2.18.4
 pandas==0.25.0
-flask==0.12.2
-celery==4.1.0
+flask==1.1.1
+celery==4.4.0
 sqlalchemy==1.2.3
 ipython
+git+https://github.com/EugeneFeshchenko/kuna-api-client.git

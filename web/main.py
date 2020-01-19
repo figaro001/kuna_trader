@@ -3,44 +3,23 @@ from datetime import datetime
 import sqlite3
 
 import pandas as pd
-from flask import Flask, Response, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, redirect, render_template, request, send_from_directory, url_for
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from trader.trader import KunaTrader, Log
-from api_client import KunaApiClient
+from kuna_client.client import KunaApiClient
+from credentials import API_KEY, API_SECRET
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-HISTORICAL_DB_PATH = os.path.join(BASE_DIR, 'data', 'historical_data.db')
-JOURNAL_DB_PATH = os.path.join(BASE_DIR, 'data', 'journal.db')
+HISTORICAL_DB_PATH = os.path.join(BASE_DIR, 'database.db')
+JOURNAL_DB_PATH = os.path.join(BASE_DIR, 'database.db')
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'celery_supervisor_err.log')
 
 engine = create_engine('sqlite:///{}'.format(JOURNAL_DB_PATH), echo=False)
 Session = sessionmaker(bind=engine)
 
 app = Flask(__name__, static_url_path='')
-
-
-@app.template_filter('currency')
-def format_currency(value):
-    value = float(value)
-    return "{:,.2f}".format(value)
-
-
-@app.template_filter('shortdate')
-def shortdate(value):
-    try:
-        value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
-        value = value.strftime('%d/%m %H:%M')
-    except:
-        value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S+03:00')
-        value = value.strftime('%d/%m %H:%M')
-    return value
-
-
-@app.template_filter('logdate')
-def logdate(value):
-    return value.strftime('%d/%m %H:%M')
 
 
 @app.route('/web/static/<path:path>')
@@ -50,7 +29,7 @@ def send_js(path):
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
-    client = KunaApiClient()
+    client = KunaApiClient(API_KEY, API_SECRET)
     if request.method == 'GET':
         eth_tick = client.get_tick()
         actives = client.get_balance()
@@ -70,15 +49,13 @@ def main():
                          'rate': log.rate,
                          })
 
-        cnx = sqlite3.connect('data/historical_data.db')
-        data = pd.read_sql_query("SELECT * FROM tick", cnx)
+        cnx = sqlite3.connect('database.db')
+        data = pd.read_sql_query("SELECT * FROM historical", cnx)
         data['short_mavg'] = data['sell'].rolling(window=93, min_periods=1, center=False).mean()
         data['long_mavg'] = data['sell'].rolling(window=104, min_periods=1, center=False).mean()
         data.index = pd.to_datetime(data.index)
-        data_long = [[x[0].timestamp() * 1000, round(x[1], 0)] for x in data['long_mavg'].items() if
-                     not pd.isnull(x[0])]
-        data_short = [[x[0].timestamp() * 1000, round(x[1], 0)] for x in data['short_mavg'].items() if
-                      not pd.isnull(x[0])]
+        data_long = [[x[0].timestamp() * 1000, round(x[1], 0)] for x in data['long_mavg'].items() if not pd.isnull(x[0])]
+        data_short = [[x[0].timestamp() * 1000, round(x[1], 0)] for x in data['short_mavg'].items() if not pd.isnull(x[0])]
         data = [[x[0].timestamp() * 1000, round(x[1], 0)] for x in data['sell'].items() if not pd.isnull(x[0])]
 
         return render_template('index.html',

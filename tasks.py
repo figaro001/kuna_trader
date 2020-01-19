@@ -2,14 +2,16 @@ from celery import Celery, chain
 import sqlite3
 import os
 import pandas as pd
-from api_client import KunaApiClient
+from kuna_client.client import KunaApiClient
 from datetime import datetime, timedelta
+
+from trader.trader import KunaTrader
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DATA_FILE_PATH = os.path.join(BASE_DIR, 'database.db')
 CONN = conn = sqlite3.connect(DB_DATA_FILE_PATH)
 
-celery = Celery('tasks', broker='redis://localhost:6379/0')
+celery = Celery('kuna', broker='redis://localhost:6379/0')
 celery.conf.beat_schedule = {
     'each-15-minutes': {
         'task': 'tasks.tick',
@@ -20,12 +22,12 @@ celery.conf.beat_schedule = {
 
 @celery.task()
 def process_signal(_):
-    # KunaTrader(db_connection=CONN).process_latest_signal()
-    pass
+    return
+    KunaTrader(db_connection=CONN).process_latest_signal()
 
 
 @celery.task
-def save_history():
+def save_tick():
     data = KunaApiClient().get_tick()
     df = pd.DataFrame({'timestamp': datetime.fromtimestamp(int(data['at'])),
                        'buy': float(data['ticker']['buy']),
@@ -40,4 +42,4 @@ def save_history():
 
 @celery.task()
 def tick():
-    chain(save_history.s(), process_signal.s())()
+    chain(save_tick.s(), process_signal.s())()

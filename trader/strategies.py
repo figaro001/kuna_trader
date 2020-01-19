@@ -10,7 +10,7 @@ class RollingMeanStrategy(object):
         self.conn = conn
 
     def fill_signals(self):
-        data = pd.read_sql_query("SELECT * FROM tick", self.conn)
+        data = pd.read_sql_query("SELECT * FROM historical", self.conn)
         data['position'] = 0.0
         data['short_mavg'] = data['sell'].rolling(window=self.short_window, min_periods=1, center=False).mean()
         data['long_mavg'] = data['sell'].rolling(window=self.long_window, min_periods=1, center=False).mean()

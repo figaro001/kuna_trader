@@ -5,7 +5,7 @@ from sqlalchemy import Column, DateTime, Integer, String, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from api_client import KunaApiClient  # TODO: Fix
+from kuna_client.client import KunaApiClient
 
 from . import strategies
 

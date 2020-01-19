@@ -1,0 +1,5 @@
+- Migrate to postgres
+- Remove "logs" table, use text logs for bot
+- Refactor api_client to be coin-agnostic
+- Refactor api_client to implement all methods
+- Move credentials to env
